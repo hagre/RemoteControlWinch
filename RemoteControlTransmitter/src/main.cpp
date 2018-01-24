@@ -18,7 +18,7 @@
 
  // REMOTE CONTROL TRANSMITTER for an agricultural winch made with an Arduino Nano (5v) and an
  // MPU9250 sensor connected via I2C. 6 switches ("multifunktion- ,pull- ,push- , start-, stop- and emergency button")
- // Indications witch WS2812 LEDs. Lipo Battery, some step up/down power regulators and chargin unit, logiclevel p-chanal MOSFET to
+ // Indications with WS2812 LEDs. Lipo Battery, some step up/down power regulators and chargin unit, logiclevel p-chanal MOSFET to
  // switch supply power on anf off via the arduino. The MPU9250 ist to detect an possible unconsciousness of the user.
  // Differnet emergency levels and a stabile and relaible RF connection including aknolegement of the receiver witch a 433mhz
  // RF69 module.

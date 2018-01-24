@@ -1,3 +1,22 @@
+/**
+ * TILT SENSOR FOR AGRICULTURAL WICH by hagre 2018
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+
 // Thes code is based on the MPU9250 Basic Example Code by Kris Winer
 // and was modified and extended by hagre 2018
 
@@ -10,11 +29,10 @@
 // This is an optional equipment as a try to gain more safety during winch operation.
 // It should be used with the remote control (transmitter and receiver) of this project.
 //
-//  TILT SENSOR FOR AGRICULTURAL WICH by hagre 2018 under GPL 3.0
-//
 //  --------------------------------------------------------------------
 //  You will need the "SparkFun MPU-9250 9 DOF IMU Breakout" library.  !
 //  It can be found under "ID944" in the PlatformIO library manager.   !
+//  https://github.com/sparkfun/MPU-9250_Breakout                      !
 //  --------------------------------------------------------------------
 
 

@@ -52,10 +52,10 @@
 
 //#define SERIAL_DEBUG
 
-#define RELAY_PIN 2
-#define SWITCHSENSOR_PIN 16
-#define STOP_SIGNAL_PIN 14
-#define OK_SIGNAL_PIN 12
+#define RELAY_PIN 5 // D1
+#define SWITCHSENSOR_PIN 16 //D0
+#define STOP_SIGNAL_PIN 14 //D5
+#define OK_SIGNAL_PIN 12 //D6
 
 #define TOOGLEINTERVAL 500;
 

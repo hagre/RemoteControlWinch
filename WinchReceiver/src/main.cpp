@@ -49,6 +49,7 @@
  #include <definitions.h>
  //#define DEBUG_SERIAL
  //#define DEBUG_SERIAL_MAIN
+ //#define DEBUG_SERIAL_WDT
  #define LIGHTFACTOR 50 //100%
 
  #include <RHReliableDatagram.h>
@@ -420,6 +421,7 @@
 
  void setup() {
    wdt_reset();
+   wdt_disable();
    pinMode (BRAKE_AND_PUSH_RELAY_PIN, OUTPUT);
    pinMode (PULL_RELAY_PIN, OUTPUT);
    pinMode (SAFETY_RELAY_PIN, OUTPUT);
@@ -455,7 +457,7 @@
    yellow.b = 0;
    yellow.g = int (float (1.50 * LIGHTFACTOR));
 
-   wdt_enable(WDTO_2S);
+   wdt_enable(WDTO_4S);
 
    #ifdef DEBUG_SERIAL_MAIN
      Serial.println ("Setup Ende");
@@ -467,6 +469,13 @@
  void loop() {
 
    wdt_reset();
+   #ifdef DEBUG_SERIAL_WDT
+     if (millis () > 15000){
+       Serial.println ("WDT");
+       Serial.println (millis ());
+       while(true);
+     }
+   #endif
 
    checkMotor ();
    checkPowertransmission ();

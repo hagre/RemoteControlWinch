@@ -16,7 +16,9 @@
  *
  */
 
- // REMOTE CONTROL TRANSMITTER for an agricultural winch made with an Arduino Nano (5v) and an
+ // REMOTE CONTROL TRANSMITTER for an agricultural winch made with an Arduino Nano (5v).
+ // To use the watchdog timer reset function you will need to flash the optiboot bootloader and
+ // use the nano like an uno.
  // MPU9250 sensor connected via I2C. 6 switches ("multifunktion- ,pull- ,push- , start-, stop- and emergency button")
  // Indications with WS2812 LEDs. Lipo Battery, some step up/down power regulators and chargin unit, logiclevel p-chanal MOSFET to
  // switch supply power on anf off via the arduino. The MPU9250 ist to detect an possible unconsciousness of the user.
@@ -48,13 +50,15 @@
  //  --------------------------------------------------------------------
 
  #include <Arduino.h>
+ #include <avr/wdt.h>
 
  #include <definitions.h>
  //#define DEBUG_SERIAL
  //#define DEBUG_SERIAL_BAT
  //#define DEBUG_SERIAL_MAIN
+ //#define DEBUG_SERIAL_WDT
  //#define DEBUG_IMU
- #define IMU
+ //#define IMU
 
  #define LIGHTFACTOR 50 //100%
 
@@ -618,6 +622,9 @@
 
 
  void setup(){
+   wdt_reset();
+   wdt_disable();
+
    //pins
    pinMode (MOSFET_POWER_PIN, OUTPUT);
    digitalWrite (MOSFET_POWER_PIN, HIGH);
@@ -680,6 +687,8 @@
    yellow.b = 0;
    yellow.g = int (float (1.50 * LIGHTFACTOR));
 
+   wdt_enable(WDTO_4S);
+
    #ifdef DEBUG_SERIAL_MAIN
      //serial
      Serial.println ("Setup Ende");
@@ -688,6 +697,16 @@
  }
 
  void loop(){
+
+   wdt_reset();
+   #ifdef DEBUG_SERIAL_WDT
+     if (millis () > 15000){
+       Serial.println ("WDT");
+       Serial.println (millis ());
+       while(true);
+     }
+   #endif
+
    #ifdef DEBUG_SERIAL_MAIN
      Serial.print ("Loop ");
      Serial.println (millis ());

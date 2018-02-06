@@ -2,7 +2,7 @@
 Remote Control of an agricultural Winch
 
 
-This project consists of 3 individulal parts:
+This project consists of 3 individual parts:
 
 + Remote (mobile transmitter)
 + Receiver (mounted on the winch)
@@ -22,7 +22,9 @@ Safety and Warranty
 
 An agricultural winch can be very dangerous, please be extremely cautious during your work in the woods.
 !!! There is absolutely NO WARRANTY for this remote control !!! Test the software and hardware extensively. Do not rely on it.
-
+I had just some freezes on my remote after 10 min up to 2 hours. I need to disconnect the battery to reset the remote. The reason could be the i2c connection to the MPU-9250 and some interference when rf transmitting. In the next step I will redesign the system and use an other arduino to check the MPU-9250 externally. The feedback to the main controller could be with just one wire discrete line.
+I had also 2 freezes on my receiver after about 2 hours of continuous use. In one case it was during a pull action, the relays remained energized, wich also keep the pulling ongoing until i disconnected the power supply. Luckily nothing bad happen.
+To prevent such conditions i have implemented an watchdog timer. To use this feature you will need to flash the arduino nanos with the optiboot bootloader and use them like an uno. If you don't flash optiboot you will get stuck in an bootloop after the WDT reset.
 
 
 Credits and Thanks 

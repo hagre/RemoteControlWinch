@@ -15,10 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
- // REMOTE CONTROL RECEIVER mounted on the agricultural winch, made with an Arduino Nano (5v) and an
- // indications by WS2812 LEDs. Including differnet emergency levels and a stabile and relaible
+ // REMOTE CONTROL RECEIVER mounted on the agricultural winch, made with an Arduino Nano (5v).
+ // To use the watchdog timer reset function you will need to flash the optiboot bootloader and
+ // use the nano like an uno.
+ // Status indications are done by WS2812 LEDs. Including differnet emergency levels and a stabile and relaible
  // RF connection including aknolegement of the receiver witch a 433mhz RF69 module. Some relays
- // to switch the 12v supply line for the pull and push valve.
+ // to switch the 12v supply line for the pull and push valve. And a wtachdogtimer to reset
+ // the system in case of an failure.
  //
  //  --------------------------------------------------------------------
  //  You will need the "LightWS2812" library.                           !
@@ -40,6 +43,7 @@
  //  --------------------------------------------------------------------
 
  #include <Arduino.h>
+ #include <avr/wdt.h>
 
  //#define WINSH
  #include <definitions.h>
@@ -415,6 +419,7 @@
  }
 
  void setup() {
+   wdt_reset();
    pinMode (BRAKE_AND_PUSH_RELAY_PIN, OUTPUT);
    pinMode (PULL_RELAY_PIN, OUTPUT);
    pinMode (SAFETY_RELAY_PIN, OUTPUT);
@@ -450,6 +455,8 @@
    yellow.b = 0;
    yellow.g = int (float (1.50 * LIGHTFACTOR));
 
+   wdt_enable(WDTO_2S);
+
    #ifdef DEBUG_SERIAL_MAIN
      Serial.println ("Setup Ende");
      Serial.println (millis ());
@@ -458,6 +465,9 @@
  }
 
  void loop() {
+
+   wdt_reset();
+
    checkMotor ();
    checkPowertransmission ();
    checkRPM ();

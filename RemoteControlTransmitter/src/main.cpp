@@ -66,8 +66,10 @@
  #include <RH_RF69.h>
  #include <SPI.h>
 
- #include <MPU9250_asukiaaa.h>
- MPU9250 mySensor;
+ #ifdef DEBUG_IMU
+   #include <MPU9250_asukiaaa.h>
+   MPU9250 mySensor;
+ #endif
 
  #include <RFTransceiver.h>
  RH_RF69 myRFdriver(RFTRANSCEIVER_NSS, RFTRANSCEIVER_DIO);

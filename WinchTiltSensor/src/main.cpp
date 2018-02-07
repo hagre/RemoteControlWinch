@@ -50,7 +50,7 @@
 #include "quaternionFilters.h"
 #include "MPU9250.h"
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 #define RELAY_PIN 5 // D1
 #define SWITCHSENSOR_PIN 16 //D0
@@ -81,11 +81,11 @@ unsigned long nextToogleTime = 0;
 MPU9250 myIMU;
 
 void SwitchWinchOff (void){
-  digitalWrite (RELAY_PIN, HIGH); //OFF
+  digitalWrite (RELAY_PIN, LOW); //OFF
 }
 
 void SwitchWinchOn (void){
-  digitalWrite (RELAY_PIN, LOW); //ON
+  digitalWrite (RELAY_PIN, HIGH); //ON
 }
 
 void statusOutput (){
@@ -152,7 +152,7 @@ void statusOutput (){
 }
 
 int checkExternalOverideButton (){
-  if (digitalRead (SWITCHSENSOR_PIN) == HIGH){ //debub ---------------------debug
+  if (digitalRead (SWITCHSENSOR_PIN) == LOW){ //debub ---------------------debug
     actualStatus = SENSOR_STATUS_OFF;
     #ifdef SERIAL_DEBUG
       Serial.println (" OVERIDE ");
@@ -165,6 +165,8 @@ int checkExternalOverideButton (){
 
 void setup(){
   pinMode (RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN,LOW);
+
   pinMode (STOP_SIGNAL_PIN, OUTPUT);
   digitalWrite (STOP_SIGNAL_PIN, LOW);
   pinMode (OK_SIGNAL_PIN, OUTPUT);
@@ -320,7 +322,7 @@ void loop(){
 
   #ifdef SERIAL_DEBUG
     // update LCD once per half-second independent of read rate
-    if (myIMU.delt_t > 500) {
+    if (myIMU.delt_t > 50) {
       Serial.print("Pitch, Roll: ");
       Serial.print(myIMU.pitch, 2);
       Serial.print(", ");

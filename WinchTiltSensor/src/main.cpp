@@ -25,6 +25,7 @@
 // of an agricultural wich during pulling operation. If the #defined limits are reached a relay
 // will disconect the power supply to the electromagnetic pull valve of the winch. There is also
 // the posibility to overide this sensor/module.
+// The actual status is sendt on Serial1.TX (D4) to the main controller winsh.
 //
 // This is an optional equipment as a try to gain more safety during winch operation.
 // It should be used with the remote control (transmitter and receiver) of this project.
@@ -50,22 +51,22 @@
 #include "quaternionFilters.h"
 #include "MPU9250.h"
 
-#define SERIAL_DEBUG
+//#define SERIAL_DEBUG
+#define OVERIDE_DEBUG
 
-#define RELAY_PIN 5 // D1
-#define SWITCHSENSOR_PIN 16 //D0
-#define STOP_SIGNAL_PIN 14 //D5
-#define OK_SIGNAL_PIN 12 //D6
+#define RELAY_PIN  12 //D6  // D1 is the normal RelayPin
+#define SWITCHSENSOR_PIN 15 //D8
+//#define SERIAL1TX_PIN 2 //D4
 
-#define TOOGLEINTERVAL 500;
+#define SENDINTERVAL 500;
 
 #define ROLL_CORRETION 0.0
 #define PITCH_CORRETION 0.0
 
 #define EMERGENCYSTOP_LIMIT_CROSS 20
 #define EMERGENCYSTOP_LIMIT_LENGTH 25
-#define WARNING_LIMIT_CROSS 10
-#define WARNING_LIMIT_LENGTH 15
+#define WARNING_LIMIT_CROSS 15
+#define WARNING_LIMIT_LENGTH 20
 
 #define SENSOR_STATUS_INIT 0
 #define SENSOR_STATUS_ON_OK 1
@@ -75,8 +76,10 @@
 #define SENSOR_STATUS_UNKNOWN 5
 
 int actualStatus = SENSOR_STATUS_UNKNOWN;
-int OK_Status = 1;
-unsigned long nextToogleTime = 0;
+int lastSendStatus = SENSOR_STATUS_UNKNOWN;
+int lastCross = SENSOR_STATUS_INIT;
+int lastLength = SENSOR_STATUS_INIT;
+unsigned long nextSendTime = 0;
 
 MPU9250 myIMU;
 
@@ -89,77 +92,79 @@ void SwitchWinchOn (void){
 }
 
 void statusOutput (){
+  int sendNow = 0;
+  if (lastSendStatus =! actualStatus){
+    lastSendStatus = actualStatus;
+    sendNow = 1;
+  }
   if (actualStatus == SENSOR_STATUS_ON_OK){
     #ifdef SERIAL_DEBUG
       Serial.print  ("OK ");
     #endif
-    digitalWrite (STOP_SIGNAL_PIN, LOW);
-    if (millis () > nextToogleTime){
-      if (OK_Status == 1){
-        digitalWrite (OK_SIGNAL_PIN, LOW);
-        OK_Status = 0;
-        #ifdef SERIAL_DEBUG
-          Serial.print (" T0 ");
-        #endif
-      }
-      else {
-        digitalWrite (OK_SIGNAL_PIN, HIGH);
-        OK_Status = 1;
-        #ifdef SERIAL_DEBUG
-          Serial.print (" T1 ");
-        #endif
-      }
-      nextToogleTime = millis () + TOOGLEINTERVAL;
+    if (millis () > nextSendTime || sendNow == 1){
+      Serial1.print ("I");
+      #ifdef SERIAL_DEBUG
+        Serial.print (" I ");
+      #endif
+      nextSendTime = millis () + SENDINTERVAL;
     }
   }
   else if (actualStatus == SENSOR_STATUS_EMERGENCYSTOP){
     #ifdef SERIAL_DEBUG
       Serial.print (" STOP ");
     #endif
-    digitalWrite (OK_SIGNAL_PIN, LOW);
-    digitalWrite (STOP_SIGNAL_PIN, HIGH);
+    if (millis () > nextSendTime || sendNow == 1){
+      Serial1.print ("E");
+      #ifdef SERIAL_DEBUG
+        Serial.print (" E ");
+      #endif
+      nextSendTime = millis () + SENDINTERVAL;
+    }
   }
   else if (actualStatus == SENSOR_STATUS_WARNING){
     #ifdef SERIAL_DEBUG
       Serial.print (" WARNING ");
     #endif
-    digitalWrite (STOP_SIGNAL_PIN, HIGH);
-    if (millis () > nextToogleTime){
-      if (OK_Status == 1){
-        digitalWrite (OK_SIGNAL_PIN, LOW);
-        OK_Status = 0;
-        #ifdef SERIAL_DEBUG
-          Serial.print (" T0 ");
-        #endif
-      }
-      else {
-        digitalWrite (OK_SIGNAL_PIN, HIGH);
-        OK_Status = 1;
-        #ifdef SERIAL_DEBUG
-          Serial.print (" T1 ");
-        #endif
-      }
-      nextToogleTime = millis () + TOOGLEINTERVAL;
+    if (millis () > nextSendTime || sendNow == 1){
+      Serial1.print ("W");
+      #ifdef SERIAL_DEBUG
+        Serial.print (" W ");
+      #endif
+      nextSendTime = millis () + SENDINTERVAL;
+    }
+  }
+  else if (actualStatus == SENSOR_STATUS_OFF){
+    #ifdef SERIAL_DEBUG
+      Serial.print (" OFF ");
+    #endif
+    if (millis () > nextSendTime || sendNow == 1){
+      Serial1.print ("O");
+      #ifdef SERIAL_DEBUG
+        Serial.print (" O ");
+      #endif
+      nextSendTime = millis () + SENDINTERVAL;
     }
   }
   else {
     #ifdef SERIAL_DEBUG
-      Serial.print (" ELSE OFF ");
+      Serial.print (" ELSE ");
     #endif
-    digitalWrite (OK_SIGNAL_PIN, LOW);
-    digitalWrite (STOP_SIGNAL_PIN, LOW);
+    if (millis () > nextSendTime || sendNow == 1){
+      Serial1.print ("X");
+      #ifdef SERIAL_DEBUG
+        Serial.print (" ? ");
+      #endif
+      nextSendTime = millis () + SENDINTERVAL;
+    }
   }
 }
 
 int checkExternalOverideButton (){
-  if (digitalRead (SWITCHSENSOR_PIN) == LOW){ //debub ---------------------debug
+  if (digitalRead (SWITCHSENSOR_PIN) == HIGH){
     actualStatus = SENSOR_STATUS_OFF;
     #ifdef SERIAL_DEBUG
       Serial.println (" OVERIDE ");
     #endif
-  }
-  else {
-
   }
 }
 
@@ -167,18 +172,17 @@ void setup(){
   pinMode (RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN,LOW);
 
-  pinMode (STOP_SIGNAL_PIN, OUTPUT);
-  digitalWrite (STOP_SIGNAL_PIN, LOW);
-  pinMode (OK_SIGNAL_PIN, OUTPUT);
-  digitalWrite (OK_SIGNAL_PIN, LOW);
-  pinMode (SWITCHSENSOR_PIN, INPUT_PULLUP);
-      digitalWrite (OK_SIGNAL_PIN, HIGH); // debub------------only-----------debug
+  pinMode (SWITCHSENSOR_PIN, INPUT);
+  #ifdef OVERIDE_DEBUG
+    digitalWrite (SWITCHSENSOR_PIN, LOW); // debub------------only-----------debug
+  #endif
   SwitchWinchOff ();
   actualStatus = SENSOR_STATUS_INIT;
   Wire.begin();
   #ifdef SERIAL_DEBUG
     Serial.begin(115200);
   #endif
+  Serial1.begin(115200);
   // Start by performing self test and reporting values
   myIMU.MPU9250SelfTest(myIMU.SelfTest);
   #ifdef SERIAL_DEBUG
@@ -284,38 +288,43 @@ void loop(){
   float correctedPitch = myIMU.pitch + PITCH_CORRETION;
 
   if (correctedPitch < - EMERGENCYSTOP_LIMIT_LENGTH || correctedPitch > EMERGENCYSTOP_LIMIT_LENGTH){
-    SwitchWinchOff ();
     actualStatus = SENSOR_STATUS_EMERGENCYSTOP;
+    lastLength = SENSOR_STATUS_EMERGENCYSTOP;
     #ifdef SERIAL_DEBUG
       Serial.println("PITCH STOP");
     #endif
   }
   else if (correctedRoll < - EMERGENCYSTOP_LIMIT_CROSS || correctedRoll > EMERGENCYSTOP_LIMIT_CROSS){
-    SwitchWinchOff ();
     actualStatus = SENSOR_STATUS_EMERGENCYSTOP;
+    lastCross = SENSOR_STATUS_EMERGENCYSTOP;
     #ifdef SERIAL_DEBUG
       Serial.println("ROLL STOP");
     #endif
   }
   else if (correctedPitch < - WARNING_LIMIT_LENGTH || correctedPitch > WARNING_LIMIT_LENGTH ){
     actualStatus = SENSOR_STATUS_WARNING;
-    SwitchWinchOn ();
     #ifdef SERIAL_DEBUG
       Serial.println("PITCH WARNING");
     #endif
   }
   else if (correctedRoll < - WARNING_LIMIT_CROSS || correctedRoll > WARNING_LIMIT_CROSS){
     actualStatus = SENSOR_STATUS_WARNING;
-    SwitchWinchOn ();
     #ifdef SERIAL_DEBUG
       Serial.println("ROLL WARNING");
     #endif
   }
   else {
     actualStatus = SENSOR_STATUS_ON_OK;
-    SwitchWinchOn ();
+    lastLength = SENSOR_STATUS_ON_OK;
+    lastCross = SENSOR_STATUS_ON_OK;
   }
 
+  if (lastLength == SENSOR_STATUS_ON_OK && lastCross == SENSOR_STATUS_ON_OK && actualStatus != SENSOR_STATUS_EMERGENCYSTOP){
+    SwitchWinchOn ();
+  }
+  else {
+    SwitchWinchOff ();
+  }
   checkExternalOverideButton ();
   statusOutput ();
 

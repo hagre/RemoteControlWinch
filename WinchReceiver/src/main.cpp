@@ -49,8 +49,10 @@
  #include <definitions.h>
  //#define DEBUG_SERIAL
  //#define DEBUG_SERIAL_MAIN
+ #define DEBUG_SERIAL_TILT
  //#define DEBUG_SERIAL_WDT
  #define LIGHTFACTOR 50 //100%
+ #define TIME_FOR_SERIAL_TO_RECEIVE_TILTSTATUS 1000
 
  #include <RHReliableDatagram.h>
  #include <RH_RF69.h>
@@ -88,6 +90,8 @@
 
  int RPM = 0;
 
+ unsigned long lastTimeSerialReceived = 0;
+
  void DoPush (){
    digitalWrite(BRAKE_AND_PUSH_RELAY_PIN, LOW);
    digitalWrite(PULL_RELAY_PIN, HIGH);
@@ -123,7 +127,44 @@
 
  void checkTilt (){
    //Testsetting, no canbus/Sensor used
-   lastStateRunningTilt = 0;
+   //lastStateRunningTilt = 0;
+   if (Serial.available()){
+     switch (Serial.read()){
+       case 'I': lastStateRunningTilt = STATUS_WINCH_TILT_ON_OK;
+            lastTimeSerialReceived = millis ();
+            #ifdef DEBUG_SERIAL_TILT
+              Serial.println (" T_ON ");
+            #endif
+            break;
+       case 'E': lastStateRunningTilt = STATUS_WINCH_TILT_EMERGENCY_CROSS;
+            lastTimeSerialReceived = millis ();
+            #ifdef DEBUG_SERIAL_TILT
+              Serial.println (" T_EMERG ");
+            #endif
+            break;
+       case 'W': lastStateRunningTilt = STATUS_WINCH_TILT_ALARM_CROSS;
+            lastTimeSerialReceived = millis ();
+            #ifdef DEBUG_SERIAL_TILT
+              Serial.println (" T_WARN ");
+            #endif
+            break;
+       case 'O': lastStateRunningTilt = STATUS_WINCH_TILT_OFF;
+            lastTimeSerialReceived = millis ();
+            #ifdef DEBUG_SERIAL_TILT
+              Serial.println (" T_OFF ");
+            #endif
+            break;
+       case 'X': lastStateRunningTilt = STATUS_WINCH_TILT_UNKNOWN;
+            lastTimeSerialReceived = millis ();
+            #ifdef DEBUG_SERIAL_TILT
+              Serial.println (" T_? ");
+            #endif
+            break;
+     }
+   }
+   if (millis () - lastTimeSerialReceived > TIME_FOR_SERIAL_TO_RECEIVE_TILTSTATUS){
+     lastStateRunningTilt = STATUS_WINCH_TILT_UNKNOWN;
+   }
  }
 
  int checkInputsAndDoRelays (){
@@ -436,9 +477,8 @@
    buttonPush.debounce(DEBOUNCE_TIME);//Default is 10 milliseconds
    buttonPull.debounce(DEBOUNCE_TIME);//Default is 10 milliseconds
 
-   #ifdef DEBUG_SERIAL
-     Serial.begin(SERIAL_SPEED);
-   #endif
+   Serial.begin(SERIAL_SPEED);
+
 
    myRF.inittt ();
 

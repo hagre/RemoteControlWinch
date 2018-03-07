@@ -58,7 +58,7 @@
  //#define DEBUG_SERIAL_MAIN
  //#define DEBUG_SERIAL_WDT
  //#define DEBUG_IMU
- //#define IMU
+ #define IMU
 
  #define LIGHTFACTOR 50 //100%
 
@@ -66,7 +66,7 @@
  #include <RH_RF69.h>
  #include <SPI.h>
 
- #ifdef DEBUG_IMU
+ #ifdef IMU
    #include <MPU9250_asukiaaa.h>
    MPU9250 mySensor;
  #endif
@@ -324,6 +324,18 @@
    else if (receivedWinshStateTilt == STATUS_WINCH_TILT_EMERGENCY_CROSS || receivedWinshStateTilt == STATUS_WINCH_TILT_EMERGENCY_LENGTH){ //red blink
      myWS2812LEDs.setMode (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_BLINK);
      myWS2812LEDs.setColor (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_RED);
+   }
+   else if (receivedWinshStateTilt == STATUS_WINCH_TILT_ON_OK){ //green on
+     myWS2812LEDs.setMode (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_ON);
+     myWS2812LEDs.setColor (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_GREEN);
+   }
+   else if (receivedWinshStateTilt == STATUS_WINCH_TILT_OFF){ //blue on
+     myWS2812LEDs.setMode (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_ON);
+     myWS2812LEDs.setColor (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_BLUE);
+   }
+   else if (receivedWinshStateTilt == STATUS_WINCH_TILT_UNKNOWN){ //blue on
+     myWS2812LEDs.setMode (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_ON);
+     myWS2812LEDs.setColor (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_BLUE);
    }
    else {
      myWS2812LEDs.setMode (WS2812_REMOTE_WINSHTILT_STATUS_LED, WS2812_OFF);
@@ -716,7 +728,9 @@
      Serial.print (" ");
      Serial.print (lastStateRunningEmergency);
      Serial.print (" ");
-     Serial.println (lastStateRunningButton);
+     Serial.print (lastStateRunningButton);
+     Serial.print (" Tilt:");
+     Serial.println (receivedWinshStateTilt);
    #endif
 
    #ifdef IMU
@@ -805,6 +819,10 @@
      receivedWinshStateMotor = myRF.getWinchStateMotor ();
      receivedWinshStatePowertransmission = myRF.getWinchStatePowertransmission ();
      receivedWinshStateTilt = myRF.getWinchStateTilt ();
+     #ifdef DEBUG_SERIAL_MAIN
+       Serial.print ("Tilt:");
+       Serial.println (receivedWinshStateTilt);
+     #endif
    }
    else if (check == 2){
      #ifdef DEBUG_SERIAL_MAIN

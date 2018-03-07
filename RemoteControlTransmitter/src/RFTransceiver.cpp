@@ -195,7 +195,7 @@ int RFTransceiver::sendNowMessageRemote (void){
   //int from = _fromRFAddress;
   if (_pMyManager.sendtoWait(_transmit_buf, 4, _fromRFAddress))  {
     // Now wait for a reply from the server
-    uint8_t len = 3;
+    uint8_t len = 4;
     uint8_t from;
     if (_pMyManager.recvfromAckTimeout(_receive_buf, &len, RF_RECEIVE_TIMEOUT, &from)){
       #ifdef DEBUG_SERIAL_RF

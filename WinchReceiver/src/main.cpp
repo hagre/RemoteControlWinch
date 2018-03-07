@@ -256,8 +256,47 @@
    return change;
  }
 
+ void doLedStatusBar (cRGB colorForBar, int indication){
+   for (int i = 0; i < 60;  i++){
+     myWS2812LEDs.setMode (WS2812_WINSH_STATUS_BAR_FRIST_LED_OF_60 + i, indication);
+     myWS2812LEDs.setColor (WS2812_WINSH_STATUS_BAR_FRIST_LED_OF_60 + i, colorForBar);
+   }
+ }
+
  void doLEDs (){
    //Statusindication Leds
+   //StatusBar60LEDs
+   if (lastStateRunningEmergency == STATUS_EMERGENCY_DEADMAN || lastStateRunningEmergency == STATUS_EMERGENCY_EXTERN || lastStateRunningEmergency == STATUS_EMERGENCY_LOCAL ){ //red blink
+     doLedStatusBar (WS2812_RED, WS2812_BLINK);
+   }
+   else if (lastStateRunningEmergency == STATUS_EMERGENCY_STOP){ //red
+     doLedStatusBar (WS2812_RED, WS2812_ON);
+   }
+   else if (lastStateRunningTilt == STATUS_WINCH_TILT_EMERGENCY_CROSS || lastStateRunningTilt == STATUS_WINCH_TILT_EMERGENCY_LENGTH){ //yellow blink
+     doLedStatusBar (WS2812_RED, WS2812_ON);
+   }
+   else if (lastStateRunningTilt == STATUS_WINCH_TILT_ALARM_CROSS || lastStateRunningTilt == STATUS_WINCH_TILT_ALARM_LENGTH){ //yellow blink
+     doLedStatusBar (WS2812_YELLOW, WS2812_ON);
+   }
+   else if (lastStateRunningWinch == STATUS_WINCH_PULL){
+     doLedStatusBar (WS2812_BLUE, WS2812_BLINK);
+   }
+   else if (lastStateRunningWinch == STATUS_WINCH_PUSH){
+     doLedStatusBar (WS2812_BLUE, WS2812_ON);
+   }
+   else if (transceivingProblemMaker != 0 ){
+    doLedStatusBar (WS2812_YELLOW, WS2812_BLINK);
+   }
+   else if (transceivingProblemMaker == 0 && lastStateRunningWinch == STATUS_WINCH_IDLE && (lastStateRunningPowertransmission != STATUS_POWERTRANSMISSION_RUN || lastStateRunningMotor != STATUS_MOTOR_RUNHIGH || lastStateRunningMotor != STATUS_MOTOR_RUNLOW)){
+    doLedStatusBar (WS2812_GREEN, WS2812_BLINK);
+   }
+   else if (transceivingProblemMaker == 0 && lastStateRunningWinch == STATUS_WINCH_IDLE && lastStateRunningPowertransmission == STATUS_POWERTRANSMISSION_RUN && lastStateRunningMotor == STATUS_MOTOR_RUNHIGH && lastStateRunningMotor == STATUS_MOTOR_RUNLOW){
+    doLedStatusBar (WS2812_GREEN, WS2812_ON);
+   }
+   else {
+    doLedStatusBar (WS2812_GREEN, WS2812_OFF);
+   }
+
    //Emergency
    if (lastStateRunningEmergency == STATUS_EMERGENCY_DEADMAN || lastStateRunningEmergency == STATUS_EMERGENCY_EXTERN || lastStateRunningEmergency == STATUS_EMERGENCY_LOCAL ){ //red blink
      myWS2812LEDs.setMode (WS2812_WINSH_EMERGENCY_STATUS_LED, WS2812_BLINK);

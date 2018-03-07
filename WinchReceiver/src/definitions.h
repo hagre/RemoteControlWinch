@@ -138,7 +138,7 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 /// LED             Arduino      WS2812 LED
 #define WS2812_NUMBER_OF_LEDS_REMOTE 19
-#define WS2812_NUMBER_OF_LEDS_WINCH 11
+#define WS2812_NUMBER_OF_LEDS_WINCH 73
 #ifdef REMOTE
   #define WS2812_NUMBER_OF_LEDS WS2812_NUMBER_OF_LEDS_REMOTE
 #endif
@@ -178,6 +178,7 @@
 #define WS2812_WINSH_PULL_STATUS_LED 9
 #define WS2812_WINSH_PUSH_STATUS_LED 8
 #define WS2812_WINSH_BAT_STATUS_LED_SOLO 10
+#define WS2812_WINSH_STATUS_BAR_FRIST_LED_OF_60 13
 
 #define WS2812LED_SPEED 600
 

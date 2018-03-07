@@ -49,7 +49,7 @@
  #include <definitions.h>
  //#define DEBUG_SERIAL
  //#define DEBUG_SERIAL_MAIN
- #define DEBUG_SERIAL_TILT
+ //#define DEBUG_SERIAL_TILT
  //#define DEBUG_SERIAL_WDT
  #define LIGHTFACTOR 50 //100%
  #define TIME_FOR_SERIAL_TO_RECEIVE_TILTSTATUS 1000
@@ -522,7 +522,7 @@
    checkRPM ();
    checkTilt ();
 
-   int check = myRF.operateAndCheckAvaliable (lastStateRunningWinch, lastStateRunningEmergency, lastStateRunningMotor, lastStateRunningPowertransmission, RPM);
+   int check = myRF.operateAndCheckAvaliable (lastStateRunningWinch, lastStateRunningEmergency, lastStateRunningMotor, lastStateRunningPowertransmission, lastStateRunningTilt, RPM);
    if (check == 1){
      transceivingProblemMaker = 0;
      receivedRemoteState = myRF.getRemoteState ();

@@ -290,7 +290,7 @@
    else if (transceivingProblemMaker == 0 && lastStateRunningWinch == STATUS_WINCH_IDLE && (lastStateRunningPowertransmission != STATUS_POWERTRANSMISSION_RUN || lastStateRunningMotor != STATUS_MOTOR_RUNHIGH || lastStateRunningMotor != STATUS_MOTOR_RUNLOW)){
     doLedStatusBar (WS2812_GREEN, WS2812_BLINK);
    }
-   else if (transceivingProblemMaker == 0 && lastStateRunningWinch == STATUS_WINCH_IDLE && lastStateRunningPowertransmission == STATUS_POWERTRANSMISSION_RUN && lastStateRunningMotor == STATUS_MOTOR_RUNHIGH && lastStateRunningMotor == STATUS_MOTOR_RUNLOW){
+   else if (transceivingProblemMaker == 0 && lastStateRunningWinch == STATUS_WINCH_IDLE && lastStateRunningPowertransmission == STATUS_POWERTRANSMISSION_RUN && (lastStateRunningMotor == STATUS_MOTOR_RUNHIGH || lastStateRunningMotor == STATUS_MOTOR_RUNLOW)){
     doLedStatusBar (WS2812_GREEN, WS2812_ON);
    }
    else {
